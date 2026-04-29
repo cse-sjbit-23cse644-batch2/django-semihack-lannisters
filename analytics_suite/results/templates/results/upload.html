@@ -1,0 +1,12 @@
+{% extends 'results/layout.html' %}
+{% block content %}
+
+<h3>Upload CSV</h3>
+
+<form method="post" action="/preview/" enctype="multipart/form-data">
+{% csrf_token %}
+<input type="file" name="file" class="form-control mb-2">
+<button class="btn btn-primary">Preview</button>
+</form>
+
+{% endblock %}

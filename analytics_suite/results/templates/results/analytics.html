@@ -1,0 +1,57 @@
+{% extends 'results/layout.html' %}
+{% block content %}
+
+<h3>Analytics</h3>
+
+<table class="table table-striped">
+<tr>
+<th>Name</th>
+<th>Course</th>
+<th>Marks</th>
+<th>Avg</th>
+<th>Status</th>
+<th>Rank</th>
+</tr>
+
+{% for d in data %}
+<tr>
+<td>{{ d.name }}</td>
+<td>{{ d.course }}</td>
+<td>{{ d.marks }}</td>
+<td>{{ d.avg }}</td>
+<td>{{ d.status }}</td>
+<td>
+{% if d.rank == "Topper" %}
+<span class="badge bg-success">Topper</span>
+{% elif d.rank == "Average" %}
+<span class="badge bg-warning">Average</span>
+{% else %}
+<span class="badge bg-danger">Weak</span>
+{% endif %}
+</td>
+</tr>
+{% endfor %}
+
+</table>
+
+<canvas id="chart"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+const labels = [{% for d in data %}"{{ d.name }}",{% endfor %}];
+const marks = [{% for d in data %}{{ d.marks }},{% endfor %}];
+
+new Chart(document.getElementById("chart"), {
+type: 'bar',
+data: {
+labels: labels,
+datasets: [{
+label: 'Marks',
+data: marks
+}]
+}
+});
+</script>
+
+{% endblock %}

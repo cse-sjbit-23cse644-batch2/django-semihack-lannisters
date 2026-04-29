@@ -1,0 +1,25 @@
+{% extends 'results/layout.html' %}
+{% block content %}
+
+<h3>Preview</h3>
+
+<table class="table table-bordered">
+<tr>
+<th>Name</th>
+<th>Course</th>
+<th>Marks</th>
+</tr>
+
+{% for row in data %}
+<tr class="{% if row.error %}table-danger{% endif %}">
+<td>{{ row.name }}</td>
+<td>{{ row.course }}</td>
+<td>{{ row.marks }}</td>
+</tr>
+{% endfor %}
+
+</table>
+
+<a href="/save/" class="btn btn-success">Save Data</a>
+
+{% endblock %}
