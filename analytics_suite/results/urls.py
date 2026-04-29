@@ -8,4 +8,5 @@ urlpatterns = [
     path('save/', views.save_csv),
     path('analytics/', views.analytics),
     path('pdf/', views.generate_pdf),
+    path('download-csv/', views.download_csv),
 ]

@@ -12,11 +12,11 @@ def home(request):
     return render(request, 'results/home.html')
 
 
-# ---------------- CSV PREVIEW ----------------
 def upload_csv(request):
     return render(request, 'results/upload.html')
 
 
+# ---------- PREVIEW ----------
 def preview_csv(request):
     global temp_data
     temp_data = []
@@ -56,12 +56,23 @@ def preview_csv(request):
     return render(request, 'results/preview.html', {'data': preview})
 
 
-# ---------------- SAVE ----------------
+# ---------- SAVE ----------
 def save_csv(request):
     records = []
 
     for row in temp_data:
         name, course_name, marks = row
+
+        try:
+            marks = int(marks)
+        except:
+            continue
+
+        if marks < 0 or marks > 100:
+            continue
+
+        if not name or not course_name:
+            continue
 
         student, _ = Student.objects.get_or_create(name=name)
         course, _ = Course.objects.get_or_create(title=course_name)
@@ -74,10 +85,10 @@ def save_csv(request):
 
     ResultRecord.objects.bulk_create(records)
 
-    return HttpResponse("Data Saved Successfully!")
+    return HttpResponse("Only valid data saved!")
 
 
-# ---------------- ANALYTICS ----------------
+# ---------- ANALYTICS ----------
 def analytics(request):
     results = ResultRecord.objects.all()
 
@@ -98,19 +109,47 @@ def analytics(request):
         else:
             rank = "Weak"
 
+        result = "Pass" if r.marks >= 40 else "Fail"
+
         data.append({
             'name': r.student.name,
             'course': r.course.title,
             'marks': r.marks,
             'avg': round(avg, 2),
             'status': status,
-            'rank': rank
+            'rank': rank,
+            'result': result
         })
 
-    return render(request, 'results/analytics.html', {'data': data})
+    total = ResultRecord.objects.count()
+    passed = ResultRecord.objects.filter(marks__gte=40).count()
+    failed = total - passed
+
+    return render(request, 'results/analytics.html', {
+        'data': data,
+        'passed': passed,
+        'failed': failed
+    })
 
 
-# ---------------- PDF ----------------
+# ---------- CSV DOWNLOAD ----------
+def download_csv(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="results.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Name', 'Course', 'Marks', 'Result'])
+
+    records = ResultRecord.objects.all()
+
+    for r in records:
+        result = "Pass" if r.marks >= 40 else "Fail"
+        writer.writerow([r.student.name, r.course.title, r.marks, result])
+
+    return response
+
+
+# ---------- PDF ----------
 def generate_pdf(request):
     total = ResultRecord.objects.count()
     passed = ResultRecord.objects.filter(marks__gte=40).count()
